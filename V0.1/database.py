@@ -16,7 +16,7 @@ class StocksDB:
         self.cur.execute("SELECT COUNT(*) FROM stocks WHERE symbol = %s AND date = %s", (symbol, date))
         count = self.cur.fetchone()[0]
         if count > 0:
-            print(f"Stock with symbol {symbol} and date {date} already exists in the database.")
+            #print(f"Stock with symbol {symbol} and date {date} already exists in the database.")
             return
 
         # Insert the new stock
