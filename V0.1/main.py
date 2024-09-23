@@ -4,7 +4,7 @@ import seaborn as sns
 import pandas as pd
 from io import StringIO
 import matplotlib.pyplot as plt
-from database import StocksDB
+from stocks_db import StocksDB
 from datetime import datetime
 
 def print_stock_data(stock_data):

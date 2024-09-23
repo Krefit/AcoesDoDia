@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 from io import StringIO
 from datetime import datetime
 from acao import Stock  # Importa a classe Stock
-from database import StocksDB  # Importa a classe de conexão com o banco de dados
+from stocks_db import StocksDB  # Importa a classe de conexão com o banco de dados
 
 def print_stock_data(stocks):
     """Exibe informações sobre cada ação."""
