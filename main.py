@@ -53,11 +53,13 @@ def main():
     )
 
     # List of tickers you want to track
-    tickers = ['AAPL']#, 'MSFT', 'GOOGL']
+    tickers = ['AAPL', 'MSFT', 'GOOGL','PETR4.SA']
 
     # For each ticker, fetch and update the data
     for ticker in tickers:
         fetch_and_update_stock_data(ticker, db)
+    
+    
 
 if __name__ == "__main__":
     main()
