@@ -1,48 +1,8 @@
-import pandas as pd
-from stock_analysis import fetch_stock_data
-from stocks_db import StocksDB  # Assuming your database class is saved in stocks_db.py
-from datetime import datetime
-
-def fetch_and_update_stock_data(ticker, db, interval="1m", period="5d"):
-    """
-    Fetches stock data using yfinance, checks the latest entry in the database, 
-    and inserts new data if available.
-    """
-    # Fetch the stock's latest timestamp from the database
-    latest_date = db.fetch_latest_timestamp(ticker)
-
-    # Convert latest_date to a format that yfinance can use if it exists
-    if latest_date:
-        print(f"Fetching data starting from: {latest_date.strftime('%Y-%m-%d %H:%M:%S')}")
-    
-    # Fetch stock data using yfinance with a 1-minute interval for the last 5 days
-    stock_data = fetch_stock_data(ticker, interval=interval)
-
-    # If no new data is available, exit early
-    if stock_data.empty:
-        print(f"No new data available for {ticker}.")
-        return
-
-    # Reset the index to have access to the 'Datetime' as a column
-    stock_data = stock_data.reset_index()
-
-    # Insert new records into the database
-    for index, row in stock_data.iterrows():
-        db.insert_stock(
-            symbol=ticker,
-            company_name=ticker,  # You can update this if you want to fetch the company name separately
-            open_price=row['Open'],
-            high_price=row['High'],
-            low_price=row['Low'],
-            close_price=row['Close'],
-            volume=row['Volume'],
-            date=row['Datetime']  # 'Datetime' is now available after resetting the index
-        )
-    print(f"Inserted {len(stock_data)} new records for {ticker}.")
-
+from stock_analysis import fetch_stock_data, calculate_moving_averages, generate_signals
+from stocks_db import StocksDB
+from backtrading import backtest, run_backtest
 
 def main():
-
     # Initialize the database connection
     db = StocksDB(
         host="localhost",
@@ -53,13 +13,25 @@ def main():
     )
 
     # List of tickers you want to track
-    tickers = ['AAPL', 'MSFT', 'GOOGL','PETR4.SA']
+    tickers = [ 'PETR4.SA']#,'AAPL', 'MSFT', 'GOOGL']
 
-    # For each ticker, fetch and update the data
+    # Fetch, update, and backtest each ticker
     for ticker in tickers:
-        fetch_and_update_stock_data(ticker, db)
-    
-    
+        print(f"\nFetching data for {ticker}...")
+        data = fetch_stock_data(ticker, period="1y", interval="1d")
+
+        if not data.empty:
+            # Calculate moving averages and generate signals
+            data = calculate_moving_averages(data)
+            data = generate_signals(data)
+            
+            # Insert new data into the database if needed (optional depending on your needs)
+            latest_date = db.fetch_latest_timestamp(ticker)
+            if latest_date:
+                print(f"Last date in the database for {ticker}: {latest_date}")
+            
+            # Perform backtesting on the data
+            run_backtest(ticker, data)
 
 if __name__ == "__main__":
     main()
